@@ -49,6 +49,23 @@ input, textarea, select { font: inherit; color: inherit; }
   border-radius: 4px;
 }
 
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  border-radius: 0.5rem;
+  background: var(--primary-900);
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
 .container-x {
   width: 100%;
   max-width: var(--container);

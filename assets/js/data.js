@@ -202,9 +202,9 @@ const FAQS = [
 ];
 
 const CONTACT_INFO = [
-  { icon: 'phone', label: 'Phone', value: '+91 90000 00000', href: 'tel:+919000000000' },
-  { icon: 'mail', label: 'Email', value: 'hello@veloqtech.com', href: 'mailto:hello@veloqtech.com' },
-  { icon: 'msg', label: 'WhatsApp', value: 'Chat with us', href: 'https://wa.me/919000000000' },
+  { icon: 'phone', label: 'Phone', value: '+91 8974016672', href: 'tel:+918974016672' },
+  { icon: 'mail', label: 'Email', value: 'veloqtech@gmail.com', href: 'mailto:veloqtech@gmail.com' },
+  { icon: 'msg', label: 'WhatsApp', value: 'Chat with us', href: 'https://wa.me/918974016672?text=Hi%20Veloqtech,%20I%20want%20to%20know%20more%20about%20your%20services.' },
   { icon: 'clock', label: 'Business Hours', value: 'Mon - Sat: 9:00 AM - 7:00 PM' },
   { icon: 'pin', label: 'Location', value: 'Agartala, Tripura, India' },
 ];
@@ -212,10 +212,9 @@ const CONTACT_INFO = [
 const FOOTER_SERVICES = ['Business Website', 'Landing Page', 'E-Commerce', 'Booking System', 'SEO Setup', 'Maintenance', 'Graphic Design', 'Video Editing', 'GBP Management'];
 const FOOTER_INDUSTRIES = ['Beauty Parlours', 'Restaurants', 'Clinics', 'Hotels', 'Gyms', 'Education'];
 const FOOTER_SOCIAL = [
-  { icon: 'linkedin', href: 'https://www.linkedin.com', label: 'LinkedIn' },
-  { icon: 'instagram', href: 'https://www.instagram.com', label: 'Instagram' },
   { icon: 'facebook', href: 'https://www.facebook.com', label: 'Facebook' },
-  { icon: 'github', href: 'https://www.github.com', label: 'GitHub' },
+  { icon: 'instagram', href: 'https://www.instagram.com', label: 'Instagram' },
+  { icon: 'linkedin', href: 'https://www.linkedin.com', label: 'LinkedIn' },
 ];
 
 const GR_INDUSTRIES = ['Beauty Parlour', 'Restaurant', 'Clinic', 'Hotel', 'Gym', 'Academy', 'Retail Shop', 'Real Estate', 'Law Firm'];

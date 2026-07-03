@@ -167,14 +167,16 @@
 .faq-a > div { overflow: hidden; }
 .faq-a p { padding: 0 1.25rem 1.25rem; font-size: 0.9375rem; color: var(--primary-600); line-height: 1.6; }
 
-/* Floating WhatsApp */
-.floating-wa { position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 50; display: flex; align-items: center; gap: 0.75rem; transition: all 0.5s var(--ease-smooth); }
+/* Floating WhatsApp + Contact */
+.floating-wa { position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 50; display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; transition: all 0.5s var(--ease-smooth); }
 .floating-wa.hidden { opacity: 0; transform: translateY(1.5rem); pointer-events: none; }
 .floating-wa-btn { position: relative; display: grid; place-items: center; height: 3.5rem; width: 3.5rem; border-radius: 999px; background: var(--color-success); color: #fff; box-shadow: var(--shadow-lift); transition: transform 0.2s; }
 .floating-wa-btn:hover { transform: scale(1.1); }
 .floating-wa-ping { position: absolute; inset: 0; border-radius: 999px; background: var(--color-success); animation: ping 1s cubic-bezier(0,0,0.2,1) infinite; opacity: 0.2; }
 .floating-wa-tooltip { position: relative; display: none; align-items: center; gap: 0.5rem; border-radius: 999px; background: #fff; box-shadow: var(--shadow-lift); padding: 0.625rem 2.25rem 0.625rem 1rem; }
 @media (min-width: 640px) { .floating-wa-tooltip.show { display: flex; } }
+.floating-contact-btn { display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 999px; background: var(--primary-900); color: #fff; font-size: 0.875rem; font-weight: 600; padding: 0.75rem 1.25rem; box-shadow: var(--shadow-lift); transition: all 0.2s; text-decoration: none; }
+.floating-contact-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow); background: var(--color-secondary); }
 
 /* Scroll progress */
 .scroll-progress { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 2px; }

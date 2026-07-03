@@ -564,30 +564,97 @@ const icon = (name) => ICONS[name] || '';
   }).join('');
 })();
 
-// ---- contact form ----
+// ---- contact form (Web3Forms integration) ----
+// NOTE: Replace YOUR_WEB3FORMS_ACCESS_KEY in the HTML hidden input with your actual key from https://web3forms.com
+// The form submits to Web3Forms API and delivers enquiries to veloqtech@gmail.com
 (function initContactForm() {
   const form = $('#contactForm');
   if (!form) return;
   const fields = $('#formFields');
   const success = $('#formSuccess');
+  const errorBox = $('#formError');
   const submit = $('#cfSubmit');
-  form.addEventListener('submit', (e) => {
+  const retry = $('#cfRetry');
+  const submitHTML = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send My Enquiry';
+
+  const showFieldError = (input, msg) => {
+    input.style.borderColor = 'var(--color-danger)';
+    input.setAttribute('aria-invalid', 'true');
+    let hint = input.parentElement.querySelector('.field-error');
+    if (!hint) {
+      hint = document.createElement('p');
+      hint.className = 'field-error';
+      hint.style.cssText = 'margin-top:0.375rem;font-size:0.75rem;color:var(--color-danger)';
+      input.parentElement.appendChild(hint);
+    }
+    hint.textContent = msg;
+  };
+  const clearFieldError = (input) => {
+    input.style.borderColor = '';
+    input.removeAttribute('aria-invalid');
+    const hint = input.parentElement.querySelector('.field-error');
+    if (hint) hint.remove();
+  };
+
+  const validate = () => {
+    let valid = true;
+    const name = $('#cf-name');
+    const business = $('#cf-business');
+    const phone = $('#cf-phone');
+    const email = $('#cf-email');
+    const message = $('#cf-message');
+    [name, business, phone, email, message].forEach(clearFieldError);
+    if (!name.value.trim()) { showFieldError(name, 'Please enter your name'); valid = false; }
+    if (!business.value.trim()) { showFieldError(business, 'Please enter your business name'); valid = false; }
+    if (!phone.value.trim()) { showFieldError(phone, 'Please enter your phone number'); valid = false; }
+    else if (!/^[+]?[\d\s\-()]{8,}$/.test(phone.value.trim())) { showFieldError(phone, 'Please enter a valid phone number'); valid = false; }
+    if (!email.value.trim()) { showFieldError(email, 'Please enter your email'); valid = false; }
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { showFieldError(email, 'Please enter a valid email address'); valid = false; }
+    if (!message.value.trim()) { showFieldError(message, 'Please enter a message'); valid = false; }
+    return valid;
+  };
+
+  const resetForm = () => {
+    fields.style.display = 'flex';
+    success.style.display = 'none';
+    if (errorBox) errorBox.style.display = 'none';
+    submit.disabled = false;
+    submit.innerHTML = submitHTML;
+  };
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (submit.disabled) return;
+    if (!validate()) return;
+
     submit.disabled = true;
     submit.innerHTML = I.loader + ' Sending...';
-    setTimeout(() => {
+
+    try {
+      const formData = new FormData(form);
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: formData,
+      });
+      const result = await response.json();
+      if (result.success) {
+        fields.style.display = 'none';
+        success.style.display = 'flex';
+        form.reset();
+        setTimeout(() => { if (success.style.display === 'flex') resetForm(); }, 6000);
+      } else {
+        throw new Error(result.message || 'Submission failed');
+      }
+    } catch (err) {
       fields.style.display = 'none';
-      success.style.display = 'flex';
-      form.reset();
-      setTimeout(() => {
-        fields.style.display = 'flex';
-        success.style.display = 'none';
-        submit.disabled = false;
-        submit.innerHTML = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send My Enquiry';
-      }, 5000);
-    }, 1200);
+      if (errorBox) errorBox.style.display = 'flex';
+      submit.disabled = false;
+      submit.innerHTML = submitHTML;
+    }
   });
+
+  if (retry) retry.addEventListener('click', resetForm);
 })();
 
 // ---- newsletter ----
@@ -625,15 +692,17 @@ const icon = (name) => ICONS[name] || '';
   }
   const ind = $('#footerIndustries');
   if (ind) {
-    ind.innerHTML = `<h3 style="font-size:0.875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:rgba(255,255,255,0.9)">Industries</h3><ul style="margin-top:1rem;display:flex;flex-direction:column;gap:0.625rem">${FOOTER_INDUSTRIES.map((l) => `<li><a href="#industries" style="font-size:0.875rem;color:rgba(255,255,255,0.6);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">${l}</a></li>`).join('')}</ul>`;
+    const indHref = document.body.contains(document.getElementById('industries')) ? '#industries' : 'index.html#industries';
+    ind.innerHTML = `<h3 style="font-size:0.875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:rgba(255,255,255,0.9)">Industries</h3><ul style="margin-top:1rem;display:flex;flex-direction:column;gap:0.625rem">${FOOTER_INDUSTRIES.map((l) => `<li><a href="${indHref}" style="font-size:0.875rem;color:rgba(255,255,255,0.6);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">${l}</a></li>`).join('')}</ul>`;
   }
   const ct = $('#footerContact');
   if (ct) {
     ct.innerHTML = `<h3 style="font-size:0.875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:rgba(255,255,255,0.9)">Get in Touch</h3><ul style="margin-top:1rem;display:flex;flex-direction:column;gap:0.75rem;font-size:0.875rem;color:rgba(255,255,255,0.6)">
       <li style="display:flex;align-items:flex-start;gap:0.625rem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--accent-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="margin-top:0.125rem;flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Agartala, Tripura, India</li>
-      <li><a href="mailto:hello@veloqtech.com" style="display:flex;align-items:center;gap:0.625rem;transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--accent-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="flex-shrink:0"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>hello@veloqtech.com</a></li>
-      <li><a href="tel:+919000000000" style="display:flex;align-items:center;gap:0.625rem;transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--accent-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="flex-shrink:0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>+91 90000 00000</a></li>
-      <li><a href="https://wa.me/919000000000" target="_blank" rel="noreferrer" style="display:flex;align-items:center;gap:0.625rem;transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--accent-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>WhatsApp Us</a></li>
+      <li><a href="mailto:veloqtech@gmail.com" style="display:flex;align-items:center;gap:0.625rem;transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--accent-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="flex-shrink:0"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>veloqtech@gmail.com</a></li>
+      <li><a href="tel:+918974016672" style="display:flex;align-items:center;gap:0.625rem;transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--accent-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="flex-shrink:0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>+91 8974016672</a></li>
+      <li><a href="https://wa.me/918974016672?text=Hi%20Veloqtech,%20I%20want%20to%20know%20more%20about%20your%20services." target="_blank" rel="noreferrer" style="display:flex;align-items:center;gap:0.625rem;transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.6)'"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--accent-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>WhatsApp Us</a></li>
+      <li style="display:flex;align-items:flex-start;gap:0.625rem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--accent-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="margin-top:0.125rem;flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Mon - Sat: 9:00 AM - 7:00 PM</li>
     </ul>`;
   }
 })();
@@ -650,6 +719,20 @@ const icon = (name) => ICONS[name] || '';
     if (s && !shown) { shown = true; setTimeout(() => tooltip?.classList.add('show'), 1500); }
   }, { passive: true });
   $('#waDismiss')?.addEventListener('click', (e) => { e.preventDefault(); tooltip?.classList.remove('show'); });
+})();
+
+// ---- smooth scroll for anchor links ----
+(function initSmoothScroll() {
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href^="#"]');
+    if (!link) return;
+    const href = link.getAttribute('href');
+    if (href === '#' || href.length < 2) return;
+    const target = document.querySelector(href);
+    if (!target) return;
+    e.preventDefault();
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 })();
 
 // ---- hero parallax ----
